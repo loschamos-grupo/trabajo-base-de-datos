@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis del Modelo Entidad-Relación - Grupo Los Chamos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .card-body ul {
+            list-style-type: none;
+            padding-left: 5px;
+        }
+        
+        .card-body li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .card-body li:before {
+            content: "•";
+            color: var(--secondary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .system-model {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .system-model h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .entity-list {
+            list-style-type: none;
+        }
+        
+        .entity-list li {
+            background-color: var(--light);
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .strengths li {
+            color: var(--success);
+        }
+        
+        .suggestions li {
+            color: var(--accent);
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .conclusion h2 {
+            margin-bottom: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* Diagram Styles */
+        .diagram {
+            margin: 25px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .er-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .entity-box {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--secondary);
+        }
+        
+        .entity-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+            color: var(--primary);
+        }
+        
+        .attribute {
+            font-size: 0.9rem;
+            padding: 3px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .relationship {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .relationship-title {
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .diagram-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .er-diagram {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Análisis del Modelo Entidad-Relación</h1>
+        <p class="subtitle">Documento: "EJERCICIOS ENTIDAD RELACIÓN - GRUPO LOS CHAMOS"</p>
+    </header>
+    
+    <div class="container">
+        <div class="info-grid">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i>
+                    Introducción
+                </div>
+                <div class="card-body">
+                    <p>El documento fue elaborado por estudiantes de la Escuela Profesional de Ingeniería de Sistemas de la Universidad Andina del Cusco para el curso de Modelado de Base de Datos.</p>
+                    <div class="highlight">
+                        <strong>Objetivo principal:</strong> Fortalecer la comprensión y aplicación de conceptos fundamentales en el diseño y representación de sistemas de información.
+                    </div>
+                    <ul>
+                        <li>Identificación de entidades, relaciones y restricciones</li>
+                        <li>Construcción de modelos conceptuales y lógicos</li>
+                        <li>Fomento del análisis crítico y trabajo colaborativo</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-file-alt"></i>
+                    Resumen del Contenido
+                </div>
+                <div class="card-body">
+                    <p>El documento presenta el desarrollo de ejercicios de modelado de bases de datos, específicamente modelos entidad-relación (MER).</p>
+                    <ul>
+                        <li><strong>Sistema de registro de asistencia del personal del INPE</strong></li>
+                        <li><strong>Sistema de facturación electrónica de la pollería Los Ángeles</strong></li>
+                    </ul>
+                    <div class="highlight">
+                        <strong>Conclusión del documento:</strong> El desarrollo del MER permite representar claramente la estructura de un sistema, asegurando la integridad de los datos.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-cube"></i>
+                    Conceptos Fundamentales
+                </div>
+                <div class="card-body">
+                    <p>El documento se centra en la etapa de diseño conceptual de bases de datos:</p>
+                    <ul>
+                        <li><strong>Entidades:</strong> Objetos del mundo real con existencia independiente</li>
+                        <li><strong>Atributos:</strong> Características que definen o identifican a una entidad</li>
+                        <li><strong>Relaciones:</strong> Cómo se asocian las diferentes entidades entre sí</li>
+                    </ul>
+                    <div class="highlight">
+                        El diseño conceptual es crucial para crear un modelo que describa los requerimientos de los usuarios.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-database"></i>
+                Modelo Entidad-Relación: Sistema de Asistencia INPE
+            </div>
+            <div class="card-body">
+                <div class="diagram">
+                    <div class="diagram-title">Figura 1: Sistema de registro de asistencia del personal del INPE</div>
+                    
+                    <div class="er-diagram">
+                        <div class="entity-box">
+                            <div class="entity-title">Empleado</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idE (Numero)</div>
+                            <div class="attribute"><i class="fas fa-font"></i> tipoDocumentoE (Texto)</div>
+                            <div class="attribute"><i class="fas fa-hashtag"></i> nroDocumentoE (Numero)</div>
+                            <div class="attribute"><i class="fas fa-signature"></i> nombreE (Texto)</div>
+                            <div class="attribute"><i class="fas fa-user"></i> paternoE (Texto)</div>
+                            <div class="attribute"><i class="fas fa-user"></i> maternoE (Texto)</div>
+                            <div class="attribute"><i class="fas fa-phone"></i> celularE (Numero)</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Turno</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idT (entero)</div>
+                            <div class="attribute"><i class="fas fa-font"></i> nombreT (texto)</div>
+                            <div class="attribute"><i class="fas fa-clock"></i> InicioT (hora)</div>
+                            <div class="attribute"><i class="fas fa-clock"></i> finT (hora)</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Asistencia</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idA (Numero)</div>
+                            <div class="attribute"><i class="fas fa-calendar"></i> fechaA (Texto)</div>
+                            <div class="attribute"><i class="fas fa-calendar-day"></i> diaA (Texto)</div>
+                            <div class="attribute"><i class="fas fa-star"></i> esFeriladoA (Numero)</div>
+                            <div class="attribute"><i class="fas fa-check-circle"></i> asistidoA (Texto)</div>
+                            <div class="attribute"><i class="fas fa-clock"></i> tardoA (Hora)</div>
+                            <div class="attribute"><i class="fas fa-sign-in-alt"></i> horaEntradaA (Hora)</div>
+                            <div class="attribute"><i class="fas fa-sign-out-alt"></i> horaSalidaA (Hora)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relationship">
+                        <div class="relationship-title">Relaciones identificadas:</div>
+                        <p>Un <strong>Empleado</strong> puede tener múltiples registros de <strong>Asistencia</strong> (relación 1:N).</p>
+                        <p>Un <strong>Turno</strong> puede estar asociado a múltiples registros de <strong>Asistencia</strong> (relación 1:N).</p>
+                        <p>La entidad <strong>Año</strong> (no detallada en atributos) organiza temporalmente los registros.</p>
+                    </div>
+                    
+                    <div class="diagram-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #3498db;"></div>
+                            <span>Entidad</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-key" style="color: #e74c3c;"></i>
+                            <span>Clave primaria</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-font" style="color: #2ecc71;"></i>
+                            <span>Atributo de texto</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-hashtag" style="color: #f39c12;"></i>
+                            <span>Atributo numérico</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <strong>Análisis del modelo:</strong> Este modelo representa un sistema de control de asistencia con las entidades principales. Se observa una estructura bien definida con atributos relevantes para el registro de asistencia. Las relaciones entre empleados, turnos y asistencia permiten un seguimiento completo de la presencia laboral.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 30px;">
+            <div class="card-header">
+                <i class="fas fa-database"></i>
+                Modelo Entidad-Relación: Sistema de Facturación Electrónica
+            </div>
+            <div class="card-body">
+                <div class="diagram">
+                    <div class="diagram-title">Figura 2: Sistema de facturación electrónica de la pollería Los Ángeles</div>
+                    
+                    <div class="er-diagram">
+                        <div class="entity-box">
+                            <div class="entity-title">Cliente</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idCliente</div>
+                            <div class="attribute"><i class="fas fa-font"></i> nombre</div>
+                            <div class="attribute"><i class="fas fa-hashtag"></i> documento</div>
+                            <div class="attribute"><i class="fas fa-phone"></i> telefono</div>
+                            <div class="attribute"><i class="fas fa-envelope"></i> email</div>
+                            <div class="attribute"><i class="fas fa-map-marker-alt"></i> direccion</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Comprobante</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idComprobante</div>
+                            <div class="attribute"><i class="fas fa-hashtag"></i> numero</div>
+                            <div class="attribute"><i class="fas fa-calendar"></i> fecha</div>
+                            <div class="attribute"><i class="fas fa-money-bill-wave"></i> total</div>
+                            <div class="attribute"><i class="fas fa-percent"></i> impuesto</div>
+                            <div class="attribute"><i class="fas fa-money-bill"></i> subtotal</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Detalle</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idDetalle</div>
+                            <div class="attribute"><i class="fas fa-hashtag"></i> cantidad</div>
+                            <div class="attribute"><i class="fas fa-money-bill-wave"></i> precioUnitario</div>
+                            <div class="attribute"><i class="fas fa-money-bill-wave"></i> subtotal</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Producto</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idProducto</div>
+                            <div class="attribute"><i class="fas fa-font"></i> nombre</div>
+                            <div class="attribute"><i class="fas fa-money-bill-wave"></i> precio</div>
+                            <div class="attribute"><i class="fas fa-utensils"></i> descripcion</div>
+                            <div class="attribute"><i class="fas fa-image"></i> imagen</div>
+                        </div>
+                        
+                        <div class="entity-box">
+                            <div class="entity-title">Categoría</div>
+                            <div class="attribute"><i class="fas fa-key"></i> idCategoria</div>
+                            <div class="attribute"><i class="fas fa-font"></i> nombre</div>
+                            <div class="attribute"><i class="fas fa-font"></i> descripcion</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relationship">
+                        <div class="relationship-title">Relaciones identificadas:</div>
+                        <p>Un <strong>Cliente</strong> puede tener múltiples <strong>Comprobantes</strong> (relación 1:N).</p>
+                        <p>Un <strong>Comprobante</strong> contiene múltiples <strong>Detalles</strong> (relación 1:N).</p>
+                        <p>Un <strong>Detalle</strong> está asociado a un <strong>Producto</strong> (relación 1:1).</p>
+                        <p>Un <strong>Producto</strong> pertenece a una <strong>Categoría</strong> (relación N:1).</p>
+                    </div>
+                    
+                    <div class="diagram-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #3498db;"></div>
+                            <span>Entidad</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-key" style="color: #e74c3c;"></i>
+                            <span>Clave primaria</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-font" style="color: #2ecc71;"></i>
+                            <span>Atributo de texto</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fas fa-hashtag" style="color: #f39c12;"></i>
+                            <span>Atributo numérico</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight">
+                    <strong>Análisis del modelo:</strong> Este modelo representa un sistema de facturación electrónica para un establecimiento de comida. Las entidades principales permiten gestionar clientes, productos, categorías y transacciones de venta. La estructura sigue un patrón típico de sistemas de facturación, con comprobantes que contienen detalles de productos vendidos.
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-check-circle"></i>
+                    Fortalezas del Documento
+                </div>
+                <div class="card-body">
+                    <ul class="strengths">
+                        <li><strong>Aplicación Práctica:</strong> Desarrolla ejercicios concretos con ejemplos relevantes</li>
+                        <li><strong>Integridad de Datos:</strong> Demuestra comprensión de los beneficios de un buen modelo</li>
+                        <li><strong>Proceso Colaborativo:</strong> Fomenta el trabajo en equipo en el desarrollo</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-lightbulb"></i>
+                    Observaciones y Sugerencias
+                </div>
+                <div class="card-body">
+                    <ul class="suggestions">
+                        <li>Mayor claridad en la etapa de diseño conceptual pura</li>
+                        <li>Detallar recopilación de requisitos y vistas de usuario</li>
+                        <li>Identificación explícita de reglas de negocio</li>
+                        <li>Especificar atributos y claves primarias</li>
+                        <li>Definir tipos de relaciones y cardinalidad</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h2>Conclusión General</h2>
+            <p>El documento "EJERCICIOS ENTIDAD RELACIÓN - Grupo los chamos" demuestra una sólida comprensión de los fundamentos del modelado entidad-relación y su aplicación práctica. Es un excelente punto de partida para afianzar las competencias en el diseño de bases de datos.</p>
+            <p>Las sugerencias proporcionadas por los autores apuntan a la mejora y expansión de las funcionalidades del sistema, mostrando una visión clara de las posibles evoluciones del proyecto.</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Análisis basado en el documento de Andia Palomino Rodrigo Inti y Quispe Sierra Alex </p>
+        <p>Universidad Andina del Cusco - 2025</p>
+    </footer>
+</body>
+</html>
+
+
